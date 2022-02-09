@@ -1,29 +1,11 @@
-class Cell:
-
-    def __init__(self, coords):
-        self.coords = coords
-        self.alive = False
-        self.neighbors = tuple()
-    
-    def __repr__(self):
-        return f"Cell(coords={self.coords})"
-        
-    def __eq__(self, other):
-        return self.coords == other.coords
-        
-    def __lt__(self, other):
-        return self.coords < other.coords
-        
-    def __gt__(self, other):
-        return self.coords > other.coords
+import numpy as np
 
 class GameOfLife:
 
-    def __init__(self, width, height):
+    def __init__(self, height, width):
         self.width = width
         self.height = height
-        self.grid = self.get_grid()
-        self.cache_neighbors()
+        self.grid = np.zeros((height, width), bool)
         self.living_cells = set()
     
     def __repr__(self):
@@ -31,46 +13,41 @@ class GameOfLife:
     
     def __str__(self):
         to_str = {False:"░",True:"█"}
-        return "\n".join("".join(to_str[cell.alive] for cell in row) for row in self.grid)
-        
-    def get_grid(self):
-        res = list()
-        for y in range(self.height):
-            res.append(list())
-            for x in range(self.width):
-                res[-1].append(Cell((y, x)))
-        return res
+        return "\n".join("".join(to_str[cell] for cell in row) for row in self.grid)
 
-    def get_neighbors(self, cell):
-        y, x = cell.coords
+    def get_neighbors(self, coords):
+        y, x = coords
         res = list()
         for i in range(-1, 2):
             for j in range(-1, 2):
                 if any((i == j == 0, min(y+i, x+j) < 0, y + i >= self.height, x + j >= self.width)):
                     continue
                 else:
-                    res.append(self.grid[y+i][x+j])
-        return tuple(res)
-
-    def cache_neighbors(self): 
-        for row in self.grid:
-            for cell in row:
-                cell.neighbors = self.get_neighbors(cell)
+                    res.append((y+i,x+j))
+        return set(res)
+        
+    def update_state(self, coords, state):
+        self.grid[coords[0]][coords[1]] = state
+        self.living_cells.add(coords)
     
-    def get_living_neighbor_count(self, cell):
-        return sum(cell.alive for cell in cell.neighbors)
-    
-    def update(self):
-        checked_dead_cells = set()
+    def update_all(self):
+        all_neighbors = set()
         newly_dead_cells = set()
-        newly_living_cells = set()
+        newly_alive_cells = set()
         for cell in self.living_cells:
-            living_neighbors_count = self.get_living_neighbor_count(cell)
-            if not 1 < living_neighbors_count < 4:
+            neighbors = self.get_neighbors(cell)
+            living_neighbors_count = sum(self.grid[pos[0]][pos[1]] for pos in neighbors)
+            if living_neighbors_count not in (2, 3):
                 newly_dead_cells.add(cell)
-
-
-
+            all_neighbors |= neighbors
+        for cell in all_neighbors:
+            living_neighbor_count = sum(self.grid[pos[0]][pos[1]] for pos in self.get_neighbors(cell))
+            if living_neighbor_count == 3:
+                newly_alive_cells.add(cell)
+        for cell in newly_alive_cells:
+            self.update_state(cell, True)
+        for cell in newly_dead_cells:
+            self.update_state(cell, False)
 
 
 
