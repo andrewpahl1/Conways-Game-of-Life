@@ -48,38 +48,3 @@ class GameOfLife:
             self.update_state(cell, True)
         for cell in newly_dead_cells:
             self.update_state(cell, False)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
