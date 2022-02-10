@@ -55,3 +55,7 @@ class GameOfLife:
             self.update_state(cell, True)
         for cell in newly_dead_cells:
             self.update_state(cell, False)
+            
+    def reset(self):
+        self.grid = np.zeros((self.height, self.width), bool)
+        self.living_cells = set()

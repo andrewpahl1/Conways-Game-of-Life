@@ -42,6 +42,9 @@ class GUI:
         elif event.type == pygame.KEYDOWN:
             if event.unicode == " ":
                 self.updating = not self.updating
+            elif event.unicode == "c":
+                self.game.reset()
+                self.updating = False
         elif event.type == pygame.QUIT:
             self.running = False
     
@@ -73,5 +76,5 @@ class GUI:
             pygame.display.flip()
 
 if __name__ == "__main__":
-    game = GUI(life.GameOfLife(50, 50))
+    game = GUI(life.GameOfLife(95, 185))
     game.run_game()
