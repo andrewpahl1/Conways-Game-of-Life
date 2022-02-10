@@ -6,6 +6,7 @@ class GameOfLife:
         self.width = width
         self.height = height
         self.grid = np.zeros((height, width), bool)
+        self.cache = dict()
         self.living_cells = set()
     
     def __repr__(self):
@@ -16,6 +17,8 @@ class GameOfLife:
         return "\n".join("".join(to_str[cell] for cell in row) for row in self.grid)
 
     def get_neighbors(self, coords):
+        if coords in self.cache:
+            return self.cache[coords]
         y, x = coords
         res = list()
         for i in range(-1, 2):
@@ -24,7 +27,8 @@ class GameOfLife:
                     continue
                 else:
                     res.append((y+i,x+j))
-        return set(res)
+        self.cache[coords] = set(res)
+        return self.cache[coords]
         
     def update_state(self, coords, state):
         self.grid[coords[0]][coords[1]] = state
