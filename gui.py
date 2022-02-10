@@ -18,7 +18,7 @@ class GUI:
         self.window_height = self.game.height * (self.cell_size + 1) + 1
         self.window_width = self.game.width * (self.cell_size + 1) + 1
         pygame.init()
-        self.screen = pygame.display.set_mode((self.window_height, self.window_width))
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height))
         pygame.display.set_caption("Conway's Game of Life")
         self.draw_field(True)
     
