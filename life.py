@@ -28,7 +28,10 @@ class GameOfLife:
         
     def update_state(self, coords, state):
         self.grid[coords[0]][coords[1]] = state
-        self.living_cells.add(coords)
+        if state == True:
+            self.living_cells.add(coords)
+        elif coords in self.living_cells:
+            self.living_cells.remove(coords)
     
     def update_all(self):
         all_neighbors = set()
