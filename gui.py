@@ -1,5 +1,6 @@
 import pygame
 import life
+import time
 
 # Globals.
 BLACK = (0, 0, 0)
@@ -11,6 +12,8 @@ class GUI:
     def __init__(self, game_of_life):
         self.game = game_of_life
         self.cell_size = 10
+        self.update_delay = 0
+        self.last_update = time.perf_counter()
         self.running = False
         self.updating = False
         self.cell_painting = False
@@ -57,8 +60,22 @@ class GUI:
             elif event.unicode == "c":
                 self.game.reset()
                 self.updating = False
+            elif event.unicode in "12345":
+                self.change_update_delay(event.unicode)
         elif event.type == pygame.QUIT:
             self.running = False
+    
+    def change_update_delay(self, new_speed):
+        if new_speed == "5":
+            self.update_delay = 0
+        elif new_speed == "4":
+            self.update_delay = 0.1
+        elif new_speed == "3":
+            self.update_delay = 0.2
+        elif new_speed == "2":
+            self.update_delay = 0.5
+        elif new_speed == "1":
+            self.update_delay = 1
     
     def get_mouse_cell_pos(self):
         x, y = pygame.mouse.get_pos()
@@ -82,8 +99,9 @@ class GUI:
                 self.handle_event(event)
             if self.cell_painting:
                 self.paint_cells()
-            if self.updating:
+            if self.updating and time.perf_counter() - self.last_update > self.update_delay:
                 self.game.update_all()
+                self.last_update = time.perf_counter()
             self.screen.fill(GREY)
             self.draw_field()
             pygame.display.flip()
