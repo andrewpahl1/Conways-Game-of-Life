@@ -9,11 +9,13 @@ WHITE = (255, 255, 255)
 GREY = (75, 75, 75)
 
 class GUI:
-    """"""
+    """Implements the graphic user interface for Conway's Game of Life."""
 
     def __init__(self, game_of_life):
         self.game = game_of_life
-        self.cell_size = 10 # The size of each side of each square cell in pixels.
+        self.cell_size = 10 # The length in pixels of each side of each square cell.
+        self.min_cell_size = 5
+        self.max_cell_size = 20
         self.update_delay = 0 # The minimum time in seconds to wait before calling GameOfLife's update_all method (user-controlled via hotkey).
         self.last_update = time.perf_counter() # The last time GameOfLife.update_all was called (used to enforce self.update_delay).
         self.running = True # Changed to false in self.handle_event to exit the game.
@@ -25,7 +27,8 @@ class GUI:
         self.window_width = self.game.width * (self.cell_size + 1) + 1
         pygame.init()
         pygame.display.set_caption("Conway's Game of Life")
-        self.screen = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
+        self.window_type = pygame.RESIZABLE
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height), self.window_type)
     
     def draw_field(self):
         """Called every time the game loop runs, draws the board and colors in any living cells."""
@@ -40,7 +43,7 @@ class GUI:
                     cell_color = WHITE
                 pygame.draw.rect(self.screen, cell_color, rect, 0)
     
-    def resize(self, window_type):
+    def resize(self):
         """Called when the window is resized, creates a new GameOfLife object with the proper dimensions to match the new window size."""
         self.updating = False
         new_vert_cell_count = round((self.screen.get_height() - 1) / (self.cell_size + 1))
@@ -50,7 +53,15 @@ class GUI:
         self.game = life.GameOfLife(new_vert_cell_count, new_horz_cell_count)
         self.window_height = self.game.height * (self.cell_size + 1) + 1
         self.window_width = self.game.width * (self.cell_size + 1) + 1
-        self.screen = pygame.display.set_mode((self.window_width, self.window_height), window_type)
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height), self.window_type)
+    
+    def resize_cells(self, input_char):
+        """Increases or decreasing the size of each cell in the grid, creating a new GameOfLife object with the proper dimensions to match the current window size given the new cell size."""
+        size_change = 1 if input_char == "+" else -1
+        if not self.min_cell_size <= size_change + self.cell_size <= self.max_cell_size:
+            return
+        self.cell_size += size_change
+        self.resize()
     
     def handle_event(self, event):
         """Handles any user input. See readme for control instructions."""
@@ -59,9 +70,11 @@ class GUI:
         if event.type == pygame.MOUSEBUTTONUP and cell_pos:
             self.cell_painting = False
         elif event.type == pygame.WINDOWMAXIMIZED:
-            self.resize(pygame.FULLSCREEN)
+            self.window_type = pygame.FULLSCREEN
+            self.resize()
         elif event.type == pygame.VIDEORESIZE:
-            self.resize(pygame.RESIZABLE)
+            self.window_type = pygame.RESIZABLE
+            self.resize()
         elif event.type == pygame.MOUSEBUTTONDOWN and cell_pos:
             self.cell_painting_state = not self.game.grid[cell_pos[0]][cell_pos[1]]
             self.cell_painting = True
@@ -73,6 +86,8 @@ class GUI:
                 self.updating = False
             elif event.unicode in "12345":
                 self.change_update_delay(event.unicode)
+            elif event.unicode in "+-":
+                self.resize_cells(event.unicode)
             elif event.unicode == "?":
                 self.random_colors = not self.random_colors
         elif event.type == pygame.QUIT:
