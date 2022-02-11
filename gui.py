@@ -28,7 +28,7 @@ class GUI:
                 cell_color = BLACK if self.game.grid[y][x] else WHITE
                 pygame.draw.rect(self.screen, cell_color, rect, 0)
     
-    def resize(self):
+    def resize(self, window_type):
         self.updating = False
         new_vert_cell_count = round((self.screen.get_height() - 1) / (self.cell_size + 1))
         new_horz_cell_count = round((self.screen.get_width() - 1) / (self.cell_size + 1))
@@ -37,15 +37,17 @@ class GUI:
         self.game = life.GameOfLife(new_vert_cell_count, new_horz_cell_count)
         self.window_height = self.game.height * (self.cell_size + 1) + 1
         self.window_width = self.game.width * (self.cell_size + 1) + 1
-        self.screen = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height), window_type)
     
     def handle_event(self, event):
         if event.type in (pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
             cell_pos = self.get_mouse_cell_pos()
         if event.type == pygame.MOUSEBUTTONUP and cell_pos:
             self.cell_painting = False
+        elif event.type == pygame.WINDOWMAXIMIZED:
+            self.resize(pygame.FULLSCREEN)
         elif event.type == pygame.VIDEORESIZE:
-            self.resize()
+            self.resize(pygame.RESIZABLE)
         elif event.type == pygame.MOUSEBUTTONDOWN and cell_pos:
             self.cell_painting_state = not self.game.grid[cell_pos[0]][cell_pos[1]]
             self.cell_painting = True
