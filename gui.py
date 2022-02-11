@@ -9,17 +9,18 @@ WHITE = (255, 255, 255)
 GREY = (75, 75, 75)
 
 class GUI:
+    """"""
 
     def __init__(self, game_of_life):
         self.game = game_of_life
-        self.cell_size = 10
-        self.update_delay = 0
-        self.last_update = time.perf_counter()
-        self.running = False
-        self.updating = False
-        self.cell_painting = False
-        self.cell_painting_state = True
-        self.random_colors = False
+        self.cell_size = 10 # The size of each side of each square cell in pixels.
+        self.update_delay = 0 # The minimum time in seconds to wait before calling GameOfLife's update_all method (user-controlled via hotkey).
+        self.last_update = time.perf_counter() # The last time GameOfLife.update_all was called (used to enforce self.update_delay).
+        self.running = True # Changed to false in self.handle_event to exit the game.
+        self.updating = False # False when the game is paused (meaning GameOfLife.update_all is not being called).
+        self.cell_painting = False # Whether the player is clicking/dragging on the board to kill/revive cells.
+        self.cell_painting_state = True # Whether cells are being brought to life by the player (True) or killed (False).
+        self.random_colors = False # Living cells are black when this is False, randomly changing colors when it's True.
         self.window_height = self.game.height * (self.cell_size + 1) + 1
         self.window_width = self.game.width * (self.cell_size + 1) + 1
         pygame.init()
@@ -27,6 +28,7 @@ class GUI:
         self.screen = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
     
     def draw_field(self):
+        """Called every time the game loop runs, draws the board and colors in any living cells."""
         for y in range(self.game.height):
             for x in range(self.game.width):
                 rect = pygame.Rect(x * (self.cell_size + 1) + 1, y * (self.cell_size + 1) + 1, self.cell_size, self.cell_size)
@@ -39,6 +41,7 @@ class GUI:
                 pygame.draw.rect(self.screen, cell_color, rect, 0)
     
     def resize(self, window_type):
+        """Called when the window is resized, creates a new GameOfLife object with the proper dimensions to match the new window size."""
         self.updating = False
         new_vert_cell_count = round((self.screen.get_height() - 1) / (self.cell_size + 1))
         new_horz_cell_count = round((self.screen.get_width() - 1) / (self.cell_size + 1))
@@ -50,6 +53,7 @@ class GUI:
         self.screen = pygame.display.set_mode((self.window_width, self.window_height), window_type)
     
     def handle_event(self, event):
+        """Handles any user input. See readme for control instructions."""
         if event.type in (pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
             cell_pos = self.get_mouse_cell_pos()
         if event.type == pygame.MOUSEBUTTONUP and cell_pos:
@@ -75,6 +79,7 @@ class GUI:
             self.running = False
     
     def change_update_delay(self, new_speed):
+        """Handles changes to the game's speed setting."""
         if new_speed == "5":
             self.update_delay = 0
         elif new_speed == "4":
@@ -87,6 +92,7 @@ class GUI:
             self.update_delay = 1
     
     def get_mouse_cell_pos(self):
+        """Translates the mouse's current position into the coordinates of the cell the mouse is currently over."""
         x, y = pygame.mouse.get_pos()
         within_cell_bounds_x = x < self.game.width * (self.cell_size + 1) + 1
         within_cell_bounds_y = y < self.game.height * (self.cell_size + 1) + 1
@@ -97,12 +103,13 @@ class GUI:
         return (cell_y, cell_x)
     
     def paint_cells(self):
+        """Uupdate the state of cells that the player drags over, either killing them if the player started on a living cell or reviving them if the player started on a dead cell."""
         cell_pos = self.get_mouse_cell_pos()
         if cell_pos:
             self.game.update_state(cell_pos, self.cell_painting_state)
     
     def run_game(self):
-        self.running = True
+        """Main game loop."""
         while self.running:
             for event in pygame.event.get():
                 self.handle_event(event)

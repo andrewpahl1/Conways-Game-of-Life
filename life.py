@@ -1,11 +1,12 @@
 class GameOfLife:
+    """Represents a non-infinite version of Conway's Game of Life. Contains the gamespace as a two-dimensional list of boolean values and several methods that implement the Game of Life's rules."""
 
     def __init__(self, height, width):
         self.width = width
         self.height = height
         self.grid = [[False for y in range(self.width)] for x in range(self.height)]
-        self.cache = dict()
-        self.living_cells = set()
+        self.cache = dict() # Store previously computed values from the get_neighbors method.
+        self.living_cells = set() # Store the coordinates of all "living" (True) cells in self.grid.
     
     def __repr__(self):
         return  f"Life(height={self.height}, width={self.width})"
@@ -15,6 +16,7 @@ class GameOfLife:
         return "\n".join("".join(to_str[cell] for cell in row) for row in self.grid)
 
     def get_neighbors(self, coords):
+        """Return the (up to) eight cells that border the cell at a given tuple of (y, z) coordinates."""
         if coords in self.cache:
             return self.cache[coords]
         y, x = coords
@@ -29,6 +31,7 @@ class GameOfLife:
         return self.cache[coords]
         
     def update_state(self, coords, state):
+        """Updates a boolean value in self.grid, keeps a record of living cells in self.living_cells."""
         if self.grid[coords[0]][coords[1]] == state:
             return
         self.grid[coords[0]][coords[1]] = state
@@ -38,6 +41,10 @@ class GameOfLife:
             self.living_cells.remove(coords)
     
     def update_all(self):
+        """Updates all cells in self.grid according to the rules of Conway's Game of Life:
+        1. Any living cell with two or three living neighbors survives.
+        2. Any dead cell with exactly three living neighbors is brought to life.
+        3. All other cells either remain dead or are killed."""
         all_neighbors = set()
         newly_dead_cells = set()
         newly_alive_cells = set()
@@ -57,5 +64,6 @@ class GameOfLife:
             self.update_state(cell, False)
             
     def reset(self):
+        """Kill all cells."""
         self.grid = [[False for y in range(self.width)] for x in range(self.height)]
         self.living_cells = set()
