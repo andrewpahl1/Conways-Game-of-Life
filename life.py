@@ -31,10 +31,12 @@ class GameOfLife:
         return self.cache[coords]
         
     def update_state(self, coords, state):
+        if self.grid[coords[0]][coords[1]] == state:
+            return
         self.grid[coords[0]][coords[1]] = state
         if state == True:
             self.living_cells.add(coords)
-        elif coords in self.living_cells:
+        else:
             self.living_cells.remove(coords)
     
     def update_all(self):
