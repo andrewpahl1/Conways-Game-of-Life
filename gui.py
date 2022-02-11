@@ -1,6 +1,7 @@
 import pygame
 import life
 import time
+import random
 
 # Globals.
 BLACK = (0, 0, 0)
@@ -18,6 +19,7 @@ class GUI:
         self.updating = False
         self.cell_painting = False
         self.cell_painting_state = True
+        self.random_colors = False
         self.window_height = self.game.height * (self.cell_size + 1) + 1
         self.window_width = self.game.width * (self.cell_size + 1) + 1
         pygame.init()
@@ -28,7 +30,12 @@ class GUI:
         for y in range(self.game.height):
             for x in range(self.game.width):
                 rect = pygame.Rect(x * (self.cell_size + 1) + 1, y * (self.cell_size + 1) + 1, self.cell_size, self.cell_size)
-                cell_color = BLACK if self.game.grid[y][x] else WHITE
+                if not self.random_colors:
+                    cell_color = BLACK if self.game.grid[y][x] else WHITE
+                elif self.game.grid[y][x]:
+                    cell_color = (random.randint(0,255),random.randint(0,255),random.randint(0,255))
+                else:
+                    cell_color = WHITE
                 pygame.draw.rect(self.screen, cell_color, rect, 0)
     
     def resize(self, window_type):
@@ -62,6 +69,8 @@ class GUI:
                 self.updating = False
             elif event.unicode in "12345":
                 self.change_update_delay(event.unicode)
+            elif event.unicode == "?":
+                self.random_colors = not self.random_colors
         elif event.type == pygame.QUIT:
             self.running = False
     
