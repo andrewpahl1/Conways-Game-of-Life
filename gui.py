@@ -18,24 +18,34 @@ class GUI:
         self.window_height = self.game.height * (self.cell_size + 1) + 1
         self.window_width = self.game.width * (self.cell_size + 1) + 1
         pygame.init()
-        self.screen = pygame.display.set_mode((self.window_width, self.window_height))
         pygame.display.set_caption("Conway's Game of Life")
-        self.draw_field(True)
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
     
-    def draw_field(self, resize=False):
-        if resize:
-            self.screen = pygame.display.set_mode((self.window_width, self.window_height))
+    def draw_field(self):
         for y in range(self.game.height):
             for x in range(self.game.width):
                 rect = pygame.Rect(x * (self.cell_size + 1) + 1, y * (self.cell_size + 1) + 1, self.cell_size, self.cell_size)
                 cell_color = BLACK if self.game.grid[y][x] else WHITE
                 pygame.draw.rect(self.screen, cell_color, rect, 0)
     
+    def resize(self):
+        self.updating = False
+        new_vert_cell_count = round((self.screen.get_height() - 1) / (self.cell_size + 1))
+        new_horz_cell_count = round((self.screen.get_width() - 1) / (self.cell_size + 1))
+        if new_vert_cell_count == self.game.height and new_horz_cell_count == self.game.width:
+            return
+        self.game = life.GameOfLife(new_vert_cell_count, new_horz_cell_count)
+        self.window_height = self.game.height * (self.cell_size + 1) + 1
+        self.window_width = self.game.width * (self.cell_size + 1) + 1
+        self.screen = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE)
+    
     def handle_event(self, event):
         if event.type in (pygame.MOUSEBUTTONUP, pygame.MOUSEBUTTONDOWN):
             cell_pos = self.get_mouse_cell_pos()
         if event.type == pygame.MOUSEBUTTONUP and cell_pos:
             self.cell_painting = False
+        elif event.type == pygame.VIDEORESIZE:
+            self.resize()
         elif event.type == pygame.MOUSEBUTTONDOWN and cell_pos:
             self.cell_painting_state = not self.game.grid[cell_pos[0]][cell_pos[1]]
             self.cell_painting = True
@@ -60,7 +70,8 @@ class GUI:
     
     def paint_cells(self):
         cell_pos = self.get_mouse_cell_pos()
-        self.game.update_state(cell_pos, self.cell_painting_state)
+        if cell_pos:
+            self.game.update_state(cell_pos, self.cell_painting_state)
     
     def run_game(self):
         self.running = True
@@ -76,5 +87,5 @@ class GUI:
             pygame.display.flip()
 
 if __name__ == "__main__":
-    game = GUI(life.GameOfLife(95, 185))
+    game = GUI(life.GameOfLife(75, 75))
     game.run_game()
