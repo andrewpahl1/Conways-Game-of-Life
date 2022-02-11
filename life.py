@@ -1,11 +1,9 @@
-import numpy as np
-
 class GameOfLife:
 
     def __init__(self, height, width):
         self.width = width
         self.height = height
-        self.grid = np.zeros((height, width), bool)
+        self.grid = [[False for y in range(self.width)] for x in range(self.height)]
         self.cache = dict()
         self.living_cells = set()
     
@@ -59,5 +57,5 @@ class GameOfLife:
             self.update_state(cell, False)
             
     def reset(self):
-        self.grid = np.zeros((self.height, self.width), bool)
+        self.grid = [[False for y in range(self.width)] for x in range(self.height)]
         self.living_cells = set()
