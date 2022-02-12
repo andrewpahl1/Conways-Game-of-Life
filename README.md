@@ -8,8 +8,8 @@ This project implements a finite variation of [Conway's Game of Life](https://en
 
 1. Download gui.py and life.py.
 2. If you don't already have it, [install Pygame](https://www.pygame.org/wiki/GettingStarted).
-3. Open the console/command prompt and navigate to the folder that holds the two .py files.
-4. Type "python gui.py" and press enter.
+3. Open the command line and navigate to the folder that holds the two .py files.
+4. Type "python gui.py" into the command line and press enter.
 
 ## Game controls
 
